@@ -2,6 +2,7 @@
 
 import pygame
 import math
+import random
 
 # Obstáculos
 
@@ -169,3 +170,33 @@ def atualizar_corpo(caminho, cabeca, tamanho_corpo):
         caminho.pop(0)
 
     return caminho
+
+# Fruta
+
+def criar_fruta(largura, altura, espessura):
+    tamanho = 15
+
+    posicao_x = random.randint(
+        espessura,
+        largura - espessura - tamanho
+    )
+
+    posicao_y = random.randint(
+        espessura,
+        altura - espessura - tamanho
+    )
+
+    fruta = pygame.Rect(
+        posicao_x,
+        posicao_y,
+        tamanho,
+        tamanho
+    )
+
+    return fruta
+
+def verificar_comida(cabeca, fruta):
+    if cabeca.colliderect(fruta):
+        return True
+
+    return False

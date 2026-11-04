@@ -9,6 +9,8 @@ from objetos import controlar_cobra
 from objetos import mover_cobra
 from objetos import desenhar_corpo
 from objetos import atualizar_corpo
+from objetos import criar_fruta
+from objetos import verificar_comida
 
 # Inicialização
 
@@ -34,9 +36,11 @@ borda = criar_borda(largura, altura, espessura)
 
 cabeca, posicao_x, posicao_y, velocidade, angulo_atual, angulo_desejado, movendo = criar_cobra()
 
-caminho = []
+fruta = criar_fruta(largura, altura, espessura)
 
-tamanho_corpo = 40
+caminho = []
+tamanho_corpo = 0
+crescimento = 0
 
 # Funções
 
@@ -49,6 +53,8 @@ def desenhar_mapa():
 
     desenhar_corpo(tela, caminho)
     pygame.draw.rect(tela, BRANCO, cabeca)
+
+    pygame.draw.rect(tela, (255, 0, 0), fruta)
 
 # Variáveis
 
@@ -79,13 +85,20 @@ while rodando:
     angulo_desejado,
     movendo
     )
-
+    
     caminho = atualizar_corpo(
     caminho,
     cabeca,
     tamanho_corpo
-)
-    # Desenho
+    )
+
+    if verificar_comida(cabeca, fruta):
+        fruta = criar_fruta(largura, altura, espessura)
+        crescimento += 20
+
+    if crescimento > 0:
+        tamanho_corpo += 1
+        crescimento -= 1
 
     desenhar_mapa()
 
