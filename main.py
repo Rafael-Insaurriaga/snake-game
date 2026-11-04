@@ -11,6 +11,8 @@ from objetos import desenhar_corpo
 from objetos import atualizar_corpo
 from objetos import criar_fruta
 from objetos import verificar_comida
+from objetos import verificar_colisao_parede
+from objetos import verificar_colisao_corpo
 
 # Inicialização
 
@@ -41,10 +43,11 @@ fruta = criar_fruta(largura, altura, espessura)
 caminho = []
 tamanho_corpo = 0
 crescimento = 0
+pontos = 0
 
 # Funções
 
-def desenhar_mapa():
+def desenhar_mapa(perdeu, pontos):
 
     tela.fill(PRETO)
 
@@ -52,13 +55,53 @@ def desenhar_mapa():
         pygame.draw.rect(tela, BRANCO, parede)
 
     desenhar_corpo(tela, caminho)
-    pygame.draw.rect(tela, BRANCO, cabeca)
+
+    pygame.draw.rect(tela, (27, 94, 32), cabeca)
 
     pygame.draw.rect(tela, (255, 0, 0), fruta)
+
+    fonte = pygame.font.SysFont(None, 36)
+
+    texto_pontos = fonte.render(
+    f"Pontos: {pontos}",
+    True,
+    (180, 180, 180)
+)
+
+    texto_pontos.set_alpha(180)
+
+    retangulo = texto_pontos.get_rect(
+    center=(largura // 2, 30)
+)
+
+    tela.blit(texto_pontos, retangulo)
+
+    if perdeu:
+
+        fonte = pygame.font.SysFont(None, 50)
+
+        texto = fonte.render(
+        "GAME OVER",
+        True,
+        (BRANCO)
+    )
+
+        tela.blit(texto, (280, 250))
+
+        fonte_pequena = pygame.font.SysFont(None, 28)
+
+        texto_reiniciar = fonte_pequena.render(
+             "Pressione R para reiniciar",
+             True,
+            BRANCO
+    )
+
+        tela.blit(texto_reiniciar, (265, 305))
 
 # Variáveis
 
 rodando = True
+perdeu = False
 
 # Loop
 
@@ -66,6 +109,8 @@ while rodando:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             rodando = False
+    
+    teclas = pygame.key.get_pressed()
 
     # Controle
 
@@ -75,31 +120,55 @@ while rodando:
     )
 
     # Movimento
-
-    posicao_x, posicao_y, cabeca, angulo_atual = mover_cobra(
-    cabeca,
-    posicao_x,
-    posicao_y,
-    velocidade,
-    angulo_atual,
-    angulo_desejado,
-    movendo
-    )
-    
-    caminho = atualizar_corpo(
-    caminho,
-    cabeca,
-    tamanho_corpo
+    if not perdeu:
+        posicao_x, posicao_y, cabeca, angulo_atual = mover_cobra(
+        cabeca,
+        posicao_x,
+        posicao_y,
+        velocidade,
+        angulo_atual,
+        angulo_desejado,
+        movendo
     )
 
-    if verificar_comida(cabeca, fruta):
+        if verificar_colisao_parede(cabeca, borda):
+            perdeu = True
+
+        if verificar_colisao_corpo(cabeca, caminho):
+            perdeu = True
+
+
+        caminho = atualizar_corpo(
+        caminho,
+        cabeca,
+        tamanho_corpo
+        )
+
+        if verificar_comida(cabeca, fruta):
+            fruta = criar_fruta(largura, altura, espessura)
+            crescimento += 20
+            pontos += 1
+
+        if crescimento > 0:
+            tamanho_corpo += 1
+            crescimento -= 1
+
+    if perdeu and teclas[pygame.K_r]:
+
+        cabeca, posicao_x, posicao_y, velocidade, angulo_atual, angulo_desejado, movendo = criar_cobra()
+
         fruta = criar_fruta(largura, altura, espessura)
-        crescimento += 20
 
-    if crescimento > 0:
-        tamanho_corpo += 1
-        crescimento -= 1
+        caminho = []
 
-    desenhar_mapa()
+        tamanho_corpo = 0
+
+        crescimento = 0
+
+        pontos = 0
+
+        perdeu = False
+
+    desenhar_mapa(perdeu,pontos)
 
     pygame.display.update() 

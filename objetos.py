@@ -200,3 +200,23 @@ def verificar_comida(cabeca, fruta):
         return True
 
     return False
+
+# Colisão
+
+def verificar_colisao_parede(cabeca, borda):
+
+    for parede in borda:
+
+        if cabeca.colliderect(parede):
+            return True
+
+    return False
+
+def verificar_colisao_corpo(cabeca, caminho):
+
+    for ponto in caminho[:-20]:
+
+        if cabeca.collidepoint(ponto):
+            return True
+
+    return False
