@@ -1,6 +1,7 @@
 # Importações
 
 import pygame
+import math
 
 # Obstáculos
 
@@ -49,8 +50,8 @@ def criar_cobra():
 
     tamanho = 20
 
-    posicao_x = 400
-    posicao_y = 300
+    posicao_x = 400.0
+    posicao_y = 300.0
     velocidade = 1
     movendo = False
 
@@ -66,6 +67,8 @@ def criar_cobra():
 
     return (
         cabeca,
+        posicao_x,
+        posicao_y,
         velocidade,
         angulo_atual,
         angulo_desejado,
@@ -75,32 +78,47 @@ def criar_cobra():
 # Movimento
 
 def mover_cobra(cabeca,
+                posicao_x,
+                posicao_y,
                 velocidade,
                 angulo_atual,
                 angulo_desejado,
                 movendo):
-
+    
     if not movendo:
         return (
-            cabeca,
-            angulo_atual
-        )
+        posicao_x,
+        posicao_y,
+        cabeca,
+        angulo_atual
+    )
+    
+    diferenca = (angulo_desejado - angulo_atual + 180) % 360 - 180
 
-    if angulo_desejado == 0:
-        cabeca.x += velocidade
+    if abs(diferenca) <= 3:
+        angulo_atual = angulo_desejado
 
-    elif angulo_desejado == 90:
-        cabeca.y += velocidade
+    elif diferenca > 0:
+        angulo_atual += 3
 
-    elif angulo_desejado == 180:
-        cabeca.x -= velocidade
+    elif diferenca < 0:
+        angulo_atual -= 3
 
-    elif angulo_desejado == 270:
-        cabeca.y -= velocidade
+    angulo_atual %= 360
+    angulo_radianos = math.radians(angulo_atual)
 
-    angulo_atual = angulo_desejado
+    movimento_x = math.cos(angulo_radianos) * velocidade
+    movimento_y = math.sin(angulo_radianos) * velocidade
+
+    posicao_x += movimento_x
+    posicao_y += movimento_y
+
+    cabeca.x = int(posicao_x)
+    cabeca.y = int(posicao_y)
 
     return (
+        posicao_x,
+        posicao_y,
         cabeca,
         angulo_atual
     )
@@ -130,3 +148,24 @@ def controlar_cobra(angulo_desejado, movendo):
     return ( angulo_desejado, 
             movendo
     )
+
+# Corpo da Cobra
+
+def desenhar_corpo(tela, caminho):
+    for x, y in caminho:
+        segmento = pygame.Rect(
+            x - 10,
+            y - 10,
+            20,
+            20
+        )
+
+        pygame.draw.rect(tela, (0, 180, 0), segmento)
+
+def atualizar_corpo(caminho, cabeca, tamanho_corpo):
+    caminho.append((cabeca.centerx, cabeca.centery))
+
+    if len(caminho) > tamanho_corpo:
+        caminho.pop(0)
+
+    return caminho

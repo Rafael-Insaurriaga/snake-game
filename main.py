@@ -7,6 +7,8 @@ from objetos import criar_borda
 from objetos import criar_cobra
 from objetos import controlar_cobra
 from objetos import mover_cobra
+from objetos import desenhar_corpo
+from objetos import atualizar_corpo
 
 # Inicialização
 
@@ -30,7 +32,11 @@ pygame.display.set_caption("Snake Game")
 
 borda = criar_borda(largura, altura, espessura)
 
-cabeca, velocidade, angulo_atual, angulo_desejado, movendo = criar_cobra()
+cabeca, posicao_x, posicao_y, velocidade, angulo_atual, angulo_desejado, movendo = criar_cobra()
+
+caminho = []
+
+tamanho_corpo = 40
 
 # Funções
 
@@ -40,7 +46,10 @@ def desenhar_mapa():
 
     for parede in borda:
         pygame.draw.rect(tela, BRANCO, parede)
-        pygame.draw.rect(tela, BRANCO, cabeca)
+
+    desenhar_corpo(tela, caminho)
+    pygame.draw.rect(tela, BRANCO, cabeca)
+
 # Variáveis
 
 rodando = True
@@ -61,14 +70,21 @@ while rodando:
 
     # Movimento
 
-    cabeca, angulo_atual = mover_cobra(
-        cabeca,
-        velocidade,
-        angulo_atual,
-        angulo_desejado,
-        movendo
+    posicao_x, posicao_y, cabeca, angulo_atual = mover_cobra(
+    cabeca,
+    posicao_x,
+    posicao_y,
+    velocidade,
+    angulo_atual,
+    angulo_desejado,
+    movendo
     )
 
+    caminho = atualizar_corpo(
+    caminho,
+    cabeca,
+    tamanho_corpo
+)
     # Desenho
 
     desenhar_mapa()
