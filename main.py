@@ -13,6 +13,8 @@ from objetos import criar_fruta
 from objetos import verificar_comida
 from objetos import verificar_colisao_parede
 from objetos import verificar_colisao_corpo
+from objetos import carregar_imagem
+from objetos import TAMANHO_COBRA, TAMANHO_FRUTA, ORIENTACAO_CABECA
 
 # Inicialização
 
@@ -33,7 +35,12 @@ espessura = 10
 # Janela
 
 tela = pygame.display.set_mode((largura, altura))
+
 pygame.display.set_caption("Snake Game")
+
+sprite_cabeca = carregar_imagem("cabeca.png", (TAMANHO_COBRA, TAMANHO_COBRA))
+sprite_corpo = carregar_imagem("corpo.png", (TAMANHO_COBRA, TAMANHO_COBRA))
+sprite_fruta = carregar_imagem("fruta.png", (TAMANHO_FRUTA, TAMANHO_FRUTA))
 
 borda = criar_borda(largura, altura, espessura)
 
@@ -56,11 +63,12 @@ def desenhar_mapa(perdeu, pontos):
     for parede in borda:
         pygame.draw.rect(tela, BRANCO, parede)
 
-    desenhar_corpo(tela, caminho)
+    desenhar_corpo(tela, caminho, sprite_corpo, cabeca)
 
-    pygame.draw.rect(tela, (27, 94, 32), cabeca)
+    imagem_cabeca = pygame.transform.rotate(sprite_cabeca, ORIENTACAO_CABECA - angulo_atual)
+    tela.blit(imagem_cabeca, imagem_cabeca.get_rect(center=cabeca.center))
 
-    pygame.draw.rect(tela, (255, 0, 0), fruta)
+    tela.blit(sprite_fruta, fruta)
 
     fonte = pygame.font.SysFont(None, 36)
 
@@ -164,7 +172,7 @@ while rodando:
         if crescimento > 0:
             contador_crescimento += 1
 
-            if contador_crescimento >= 10:
+            if contador_crescimento >= (TAMANHO_COBRA // 2) / velocidade:
                 contador_crescimento = 0
                 tamanho_corpo += 1
                 crescimento -= 1

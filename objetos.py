@@ -3,6 +3,24 @@
 import pygame
 import math
 import random
+import os
+
+# Tamanhos
+TAMANHO_COBRA = 40    # cabeça e corpo (era 20)
+TAMANHO_FRUTA = 45    # maçã (era 15)
+
+# Para onde cada sprite "olha" no arquivo PNG:
+# 0 = direita, 90 = baixo, 180 = esquerda, 270 = cima
+ORIENTACAO_CABECA = 90
+ORIENTACAO_CORPO = 270
+PONTOS_PESCOCO = 2  # pontos mais recentes que a cabeça ignora na colisão
+
+PASTA_ASSETS = os.path.join(os.path.dirname(__file__), "assets")
+
+def carregar_imagem(nome, tamanho):
+    arquivo = os.path.join(PASTA_ASSETS, nome)
+    imagem = pygame.image.load(arquivo).convert_alpha()
+    return pygame.transform.scale(imagem, tamanho)
 
 # Obstáculos
 
@@ -49,7 +67,7 @@ def criar_borda(largura, altura, espessura):
 
 def criar_cobra():
 
-    tamanho = 20
+    tamanho = TAMANHO_COBRA
 
     posicao_x = 400.0
     posicao_y = 300.0
@@ -154,20 +172,25 @@ def controlar_cobra(angulo_desejado, movendo):
 
 # Corpo da Cobra
 
-def desenhar_corpo(tela, caminho):
-    for x, y in caminho:
-        segmento = pygame.Rect(
-            x - 10,
-            y - 10,
-            20,
-            20
-        )
+def desenhar_corpo(tela, caminho, sprite_corpo, cabeca):
 
-        pygame.draw.rect(tela, (0, 180, 0), segmento)
+    for i, (x, y) in enumerate(caminho):
+
+        # direção: do segmento atual para o da frente (ou para a cabeça)
+        if i + 1 < len(caminho):
+            proximo_x, proximo_y = caminho[i + 1]
+        else:
+            proximo_x, proximo_y = cabeca.center
+
+        angulo = math.degrees(math.atan2(proximo_y - y, proximo_x - x))
+
+        imagem = pygame.transform.rotate(sprite_corpo, ORIENTACAO_CORPO - angulo)
+        tela.blit(imagem, imagem.get_rect(center=(x, y)))
+
 
 def atualizar_corpo(caminho, cabeca, tamanho_corpo):
 
-    distancia_minima = 10
+    distancia_minima = TAMANHO_COBRA / 2
 
     if not caminho:
         caminho.append((cabeca.centerx, cabeca.centery))
@@ -192,7 +215,7 @@ def atualizar_corpo(caminho, cabeca, tamanho_corpo):
 # Fruta
 
 def criar_fruta(largura, altura, espessura):
-    tamanho = 15
+    tamanho = TAMANHO_FRUTA
 
     posicao_x = random.randint(
         espessura,
@@ -232,7 +255,7 @@ def verificar_colisao_parede(cabeca, borda):
 
 def verificar_colisao_corpo(cabeca, caminho):
 
-    for ponto in caminho[:-20]:
+    for ponto in caminho[:-PONTOS_PESCOCO]:
 
         if cabeca.collidepoint(ponto):
             return True
