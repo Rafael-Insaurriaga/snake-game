@@ -15,6 +15,7 @@ from objetos import verificar_colisao_parede
 from objetos import verificar_colisao_corpo
 from objetos import carregar_imagem
 from objetos import TAMANHO_COBRA, TAMANHO_FRUTA, ORIENTACAO_CABECA
+from objetos import carregar_recorde, salvar_recorde
 
 # Inicialização
 
@@ -53,10 +54,11 @@ tamanho_corpo = 0
 crescimento = 0
 contador_crescimento = 0
 pontos = 0
+recorde = carregar_recorde()
 
 # Funções
 
-def desenhar_mapa(perdeu, pontos):
+def desenhar_mapa(perdeu, pontos, recorde):
 
     tela.fill(PRETO)
 
@@ -85,6 +87,19 @@ def desenhar_mapa(perdeu, pontos):
 )
 
     tela.blit(texto_pontos, retangulo)
+
+    texto_recorde = fonte.render(
+        f"Recorde: {recorde}",
+        True,
+        (180, 180, 180)
+    )
+
+    texto_recorde.set_alpha(180)
+
+    tela.blit(
+        texto_recorde,
+        texto_recorde.get_rect(center=(largura // 2, altura - 30))
+    )
 
     if perdeu:
 
@@ -167,7 +182,9 @@ while rodando:
                 fruta = criar_fruta(largura, altura, espessura)
                 crescimento += 2    # era 20: metade, pra testar
                 pontos += 1
-
+                if pontos > recorde:
+                    recorde = pontos
+                
         # fora do for: roda 1 vez por frame, com ou sem dash
         if crescimento > 0:
             contador_crescimento += 1
@@ -176,6 +193,9 @@ while rodando:
                 contador_crescimento = 0
                 tamanho_corpo += 1
                 crescimento -= 1
+
+        if perdeu:
+            salvar_recorde(recorde)        
 
     if perdeu and teclas[pygame.K_r]:
 
@@ -195,7 +215,10 @@ while rodando:
 
         perdeu = False
 
-    desenhar_mapa(perdeu,pontos)
+    desenhar_mapa(perdeu, pontos, recorde)
 
     pygame.display.update() 
     clock.tick(60)
+
+salvar_recorde(recorde)
+pygame.quit()

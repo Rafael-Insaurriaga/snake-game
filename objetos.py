@@ -261,3 +261,18 @@ def verificar_colisao_corpo(cabeca, caminho):
             return True
 
     return False
+
+# Recorde
+
+ARQUIVO_RECORDE = os.path.join(os.path.dirname(__file__), "recorde.txt")
+
+def carregar_recorde():
+    try:
+        with open(ARQUIVO_RECORDE, "r") as arquivo:
+            return int(arquivo.read().strip())
+    except (FileNotFoundError, ValueError):
+        return 0
+
+def salvar_recorde(recorde):
+    with open(ARQUIVO_RECORDE, "w") as arquivo:
+        arquivo.write(str(recorde))
