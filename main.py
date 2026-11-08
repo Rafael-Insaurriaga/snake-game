@@ -17,6 +17,7 @@ from objetos import verificar_colisao_corpo
 # Inicialização
 
 pygame.init()
+clock = pygame.time.Clock()
 
 # Cores
 
@@ -43,6 +44,7 @@ fruta = criar_fruta(largura, altura, espessura)
 caminho = []
 tamanho_corpo = 0
 crescimento = 0
+contador_crescimento = 0
 pontos = 0
 
 # Funções
@@ -121,37 +123,51 @@ while rodando:
 
     # Movimento
     if not perdeu:
-        posicao_x, posicao_y, cabeca, angulo_atual = mover_cobra(
-        cabeca,
-        posicao_x,
-        posicao_y,
-        velocidade,
-        angulo_atual,
-        angulo_desejado,
-        movendo
-    )
+        passos = 1
 
-        if verificar_colisao_parede(cabeca, borda):
-            perdeu = True
+        if teclas[pygame.K_SPACE]:
+            passos = 5   # dash: 5 passos de 1px por frame
 
-        if verificar_colisao_corpo(cabeca, caminho):
-            perdeu = True
+        for i in range(passos):
+            posicao_x, posicao_y, cabeca, angulo_atual = mover_cobra(
+                cabeca,
+                posicao_x,
+                posicao_y,
+                velocidade,
+                angulo_atual,
+                angulo_desejado,
+                movendo,
+                girar=(i == 0)   
+            )
 
+            if verificar_colisao_parede(cabeca, borda):
+                perdeu = True
 
-        caminho = atualizar_corpo(
-        caminho,
-        cabeca,
-        tamanho_corpo
-        )
+            if verificar_colisao_corpo(cabeca, caminho):
+                perdeu = True
 
-        if verificar_comida(cabeca, fruta):
-            fruta = criar_fruta(largura, altura, espessura)
-            crescimento += 20
-            pontos += 1
+            if perdeu:
+                break
 
+            caminho = atualizar_corpo(
+                caminho,
+                cabeca,
+                tamanho_corpo
+            )
+
+            if verificar_comida(cabeca, fruta):
+                fruta = criar_fruta(largura, altura, espessura)
+                crescimento += 2    # era 20: metade, pra testar
+                pontos += 1
+
+        # fora do for: roda 1 vez por frame, com ou sem dash
         if crescimento > 0:
-            tamanho_corpo += 1
-            crescimento -= 1
+            contador_crescimento += 1
+
+            if contador_crescimento >= 10:
+                contador_crescimento = 0
+                tamanho_corpo += 1
+                crescimento -= 1
 
     if perdeu and teclas[pygame.K_r]:
 
@@ -165,6 +181,8 @@ while rodando:
 
         crescimento = 0
 
+        contador_crescimento = 0
+
         pontos = 0
 
         perdeu = False
@@ -172,3 +190,4 @@ while rodando:
     desenhar_mapa(perdeu,pontos)
 
     pygame.display.update() 
+    clock.tick(60)

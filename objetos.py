@@ -84,28 +84,31 @@ def mover_cobra(cabeca,
                 velocidade,
                 angulo_atual,
                 angulo_desejado,
-                movendo):
-    
+                movendo,
+                girar=True):
+
     if not movendo:
         return (
-        posicao_x,
-        posicao_y,
-        cabeca,
-        angulo_atual
-    )
-    
-    diferenca = (angulo_desejado - angulo_atual + 180) % 360 - 180
+            posicao_x,
+            posicao_y,
+            cabeca,
+            angulo_atual
+        )
 
-    if abs(diferenca) <= 3:
-        angulo_atual = angulo_desejado
+    if girar:
+        diferenca = (angulo_desejado - angulo_atual + 180) % 360 - 180
 
-    elif diferenca > 0:
-        angulo_atual += 3
+        if abs(diferenca) <= 3:
+            angulo_atual = angulo_desejado
 
-    elif diferenca < 0:
-        angulo_atual -= 3
+        elif diferenca > 0:
+            angulo_atual += 3
 
-    angulo_atual %= 360
+        elif diferenca < 0:
+            angulo_atual -= 3
+
+        angulo_atual %= 360
+
     angulo_radianos = math.radians(angulo_atual)
 
     movimento_x = math.cos(angulo_radianos) * velocidade
@@ -122,8 +125,7 @@ def mover_cobra(cabeca,
         posicao_y,
         cabeca,
         angulo_atual
-    )
-
+        )
 # Controle da Cobra
 
 def controlar_cobra(angulo_desejado, movendo):
@@ -164,7 +166,23 @@ def desenhar_corpo(tela, caminho):
         pygame.draw.rect(tela, (0, 180, 0), segmento)
 
 def atualizar_corpo(caminho, cabeca, tamanho_corpo):
-    caminho.append((cabeca.centerx, cabeca.centery))
+
+    distancia_minima = 10
+
+    if not caminho:
+        caminho.append((cabeca.centerx, cabeca.centery))
+
+    else:
+
+        ultimo_x, ultimo_y = caminho[-1]
+
+        distancia = math.hypot(
+            cabeca.centerx - ultimo_x,
+            cabeca.centery - ultimo_y
+        )
+
+        if distancia >= distancia_minima:
+            caminho.append((cabeca.centerx, cabeca.centery))
 
     if len(caminho) > tamanho_corpo:
         caminho.pop(0)
